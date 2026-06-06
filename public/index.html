@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decentralized File System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #0099cc;
+            --accent-color: #00ff88;
+            --danger-color: #ff4757;
+            --success-color: #00ff88;
+            --warning-color: #ffa502;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #050505;
+            --card-bg: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #333333;
+            --glow-color: rgba(0, 212, 255, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .navbar {
+            background: rgba(26, 26, 26, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .brand-text {
+            position: relative;
+        }
+
+        .user-info-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-section h1 {
+            font-weight: 800;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-section .lead {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.1);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(0, 153, 204, 0.05));
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+            transform: scale(1.02);
+            box-shadow: 0 0 30px var(--glow-color);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 153, 204, 0.15));
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--glow-color);
+        }
+
+        .upload-area i {
+            color: var(--primary-color);
+            filter: drop-shadow(0 0 10px var(--glow-color));
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover i {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 20px var(--glow-color));
+        }
+
+        .code-display {
+            background: linear-gradient(135deg, var(--card-bg), #2a2a2a);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .code-display:hover::before {
+            left: 100%;
+        }
+
+        .file-item {
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: var(--card-bg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .file-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .admin-panel {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #ee5a24 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .user-panel {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #44a08d 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 12px 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #00cc66);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #ff3742);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-outline-success {
+            border: 2px solid var(--success-color);
+            color: var(--success-color);
+            background: transparent;
+        }
+
+        .btn-outline-success:hover {
+            background: var(--success-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .form-control {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: var(--card-bg);
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-text {
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 102, 0.1));
+            border-left: 4px solid var(--success-color);
+            color: var(--text-primary);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(255, 55, 71, 0.1));
+            border-left: 4px solid var(--danger-color);
+            color: var(--text-primary);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-primary);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(255, 165, 2, 0.1), rgba(255, 140, 0, 0.1));
+            border-left: 4px solid var(--warning-color);
+            color: var(--text-primary);
+        }
+
+        .badge {
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-weight: 600;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--text-secondary);
+            border-radius: 12px 12px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .justify-content-between {
+            justify-content: space-between;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        .mb-0 { margin-bottom: 0; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 1rem; }
+        .me-1 { margin-right: 0.25rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .me-3 { margin-right: 1rem; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--secondary-color), var(--primary-color));
+        }
+
+        /* Animation for page load */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        /* Floating particles animation */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float-particle 20s infinite linear;
+        }
+
+        .particle:nth-child(odd) {
+            background: var(--accent-color);
+            animation-duration: 25s;
+        }
+
+        .particle:nth-child(3n) {
+            background: var(--secondary-color);
+            animation-duration: 30s;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced container spacing */
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glow effects for important elements */
+        .glow-on-hover {
+            transition: all 0.3s ease;
+        }
+
+        .glow-on-hover:hover {
+            box-shadow: 0 0 20px var(--glow-color);
+        }
+
+        /* Enhanced file item animations */
+        .file-item h6 {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .file-item small {
+            color: var(--text-secondary);
+        }
+
+        /* Better button spacing and alignment */
+        .btn-group-custom {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced form styling */
+        .form-floating {
+            position: relative;
+        }
+
+        .form-floating > .form-control {
+            height: calc(3.5rem + 2px);
+            line-height: 1.25;
+        }
+
+        .form-floating > label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 1rem 0.75rem;
+            pointer-events: none;
+            border: 1px solid transparent;
+            transform-origin: 0 0;
+            transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+        }
+
+        /* Custom scrollbar for file lists */
+        .file-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Enhanced progress bar */
+        .progress-enhanced {
+            height: 12px;
+            border-radius: 15px;
+            background: var(--card-bg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Modal Styling */
+        .modal {
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            border-radius: 0 0 20px 20px;
+            padding: 1.5rem;
+        }
+
+        .btn-close {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Enhanced code display in modal */
+        .modal .code-display {
+            background: linear-gradient(135deg, var(--card-bg), #2a2a2a);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 25px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary-color);
+            letter-spacing: 3px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 212, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .modal .code-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .modal .code-display:hover::before {
+            left: 100%;
+        }
+
+        /* Modal alert styling */
+        .modal .alert {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-primary);
+        }
+
+        /* Modal button styling */
+        .modal .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 12px 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .modal .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        .modal .btn-secondary {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal .btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .upload-area {
+                padding: 40px 20px;
+            }
+
+            .modal .code-display {
+                font-size: 1.2rem;
+                letter-spacing: 2px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                <span class="brand-text">Decentralized File System</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span id="user-info" class="navbar-text me-3 user-info-text"></span>
+                <button id="logout-btn" class="btn btn-outline-primary btn-sm hidden">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4">Secure File Upload System</h1>
+            <p class="lead">Upload files securely and share them with unique codes</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Login/Signup Forms -->
+        <div id="auth-section">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="auth-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="signup-tab" data-bs-toggle="tab" href="#signup">
+                                        <i class="fas fa-user-plus me-2"></i>Sign Up
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <!-- Login Form -->
+                                <div class="tab-pane fade show active" id="login">
+                                    <form id="login-form">
+                                        <div class="mb-3">
+                                            <label for="login-email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="login-email" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="login-password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="login-password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                                        </button>
+                                    </form>
+                                </div>
+                                <!-- Signup Form -->
+                                <div class="tab-pane fade" id="signup">
+                                    <form id="signup-form">
+                                        <div class="mb-3">
+                                            <label for="signup-username" class="form-label">Username</label>
+                                            <input type="text" class="form-control" id="signup-username" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="signup-email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="signup-email" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="signup-password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="signup-password" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="signup-role" class="form-label">Role</label>
+                                            <select class="form-select" id="signup-role" required>
+                                                <option value="user">User</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-user-plus me-2"></i>Sign Up
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="user-dashboard" class="hidden">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card user-panel">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-upload me-2"></i>Upload File
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="upload-area" id="upload-area">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                <h5>Drag & Drop your file here</h5>
+                                <p class="text-muted">or click to browse</p>
+                                <input type="file" id="file-input" class="d-none" accept="*/*">
+                            </div>
+                            <div id="upload-progress" class="mt-3 hidden">
+                                <div class="progress progress-enhanced">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div id="upload-result" class="mt-3 hidden">
+                                <div class="alert alert-success">
+                                    <h6>File uploaded successfully!</h6>
+                                    <p class="mb-2">Your upload code:</p>
+                                    <div class="code-display glow-on-hover" id="upload-code"></div>
+                                    <div class="mt-3">
+                                        <strong>Next Steps:</strong>
+                                        <ol class="mt-2">
+                                            <li>Copy the code above</li>
+                                            <li>Share it with the admin manually (message, email, etc.)</li>
+                                            <li>Admin will enter this code to access your file</li>
+                                            <li>Code will change after 60 seconds of admin entry</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-folder me-2"></i>My Files
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="user-files-list" class="file-list-container">
+                                <p class="text-muted">No files uploaded yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard" class="hidden">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card admin-panel">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-search me-2"></i>Enter File Code
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Instructions:</strong> Ask the user to provide their upload code, then enter it below to access their file.
+                            </div>
+                            <form id="check-code-form">
+                                <div class="mb-3">
+                                    <label for="upload-code-input" class="form-label">Upload Code from User</label>
+                                    <input type="text" class="form-control" id="upload-code-input" 
+                                           placeholder="Enter the code provided by the user" required>
+                                    <div class="form-text">The user should share this code with you manually</div>
+                                </div>
+                                <button type="submit" class="btn btn-light w-100">
+                                    <i class="fas fa-search me-2"></i>Access File
+                                </button>
+                            </form>
+                            <div id="code-result" class="mt-3 hidden"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card hidden" id="file-display-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file me-2"></i>File Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="admin-files-list" class="file-list-container">
+                                <p class="text-muted">Enter a code to view file details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
