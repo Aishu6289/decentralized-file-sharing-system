@@ -163,17 +163,16 @@ npm run dev
 
 ## License
 
-MIT License - feel free to use this project for educational or commercial purposes
+MIT License - feel free to use this project for educational or commercial purposes.
 
 ## Future Enhancements
 
-The following features can be added in future versions:
+The following features can be added in future versions
 
 - Blockchain-based file verification
 - IPFS integration for decentralized storage
 - Email notifications for file access
 - File encryption before upload
 - Download history tracking
-- Multi-factor authentication (MFA)
 - Cloud storage support (AWS S3, Firebase, Azure)
 
