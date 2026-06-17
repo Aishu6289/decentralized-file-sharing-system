@@ -165,12 +165,16 @@ npm run dev
 
 MIT License - feel free to use this project for educational or commercial purposes.
 
- ## Project Goals
+ ## Future Enhancements
 
-- Provide secure file storage
-- Enable role-based access control
-- Prevent unauthorized file access
-- Support future decentralized storage integration
-- Improve data security and reliability
+The following features can be added in future versions:
 
+- Blockchain-based file verification
+- IPFS integration for decentralized storage
+- Email notifications for file access
+- File sharing between users
+- File encryption before upload
+- Download history tracking
+- Multi-factor authentication (MFA)
+- Cloud storage support (AWS S3, Firebase, Azure)
 
